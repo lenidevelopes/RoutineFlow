@@ -96,9 +96,18 @@
         "userId": { "type": "string", "description": "The ID of the user." },
         "darkMode": { "type": "boolean", "description": "Whether the user has dark mode enabled." },
         "notifications": { "type": "boolean", "description": "Whether the user has notifications enabled." },
-        "theme": { "type": "string", "enum": ["system", "default", "dark", "light"], "description": "The theme selected by the user." }
+        "theme": { "type": "string", "enum": ["system", "default", "dark", "light"], "description": "The theme selected by the user." },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether the user has completed onboarding." },
+        "agreedToTerms": { "type": "boolean", "description": "Whether the user has agreed to the terms." },
+        "level": { "type": "number", "description": "The user's level." },
+        "xp": { "type": "number", "description": "The user's experience points." },
+        "skills": { "type": "object", "properties": { "discipline": { "type": "number" }, "fitness": { "type": "number" }, "focus": { "type": "number" } }, "description": "The user's skills." },
+        "onboardingData": { "type": "object", "description": "Data collected during onboarding." },
+        "skipsToday": { "type": "number", "description": "Number of skips used today." },
+        "lastSkipReset": { "type": "string", "format": "date-time", "description": "The last time the skip count was reset." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "The last time the settings were updated." }
       },
-      "required": ["userId", "darkMode", "notifications", "theme"]
+      "required": ["userId", "darkMode", "notifications", "theme", "onboardingCompleted", "agreedToTerms", "level", "xp", "skills", "skipsToday", "lastSkipReset"]
     }
   },
   "firestore": {

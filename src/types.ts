@@ -1,108 +1,51 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-export type Priority = 'low' | 'medium' | 'high';
-export type TaskCategory = string;
-
-export interface Task {
-  id?: string;
-  userId: string;
-  title: string;
-  description?: string;
-  completed: boolean;
-  completedAt?: string;
-  priority: Priority;
-  category: TaskCategory;
-  tags: string[];
-  dueDate?: string;
-  checklist: { text: string; completed: boolean }[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RoutineTask {
-  id: string;
-  title: string;
-  description?: string;
-  start_time?: string; // 12h format: "07:00 AM"
-  end_time?: string;   // 12h format: "07:30 AM"
-  duration_minutes: number;
-  mode: 'fixed' | 'duration';
-  completed: boolean;
-}
-
-export type RoutineType = 'morning' | 'school' | 'evening' | 'custom';
-
-export interface Routine {
-  id?: string;
-  userId: string;
-  name: string;
-  type: RoutineType;
-  activeDays: string[]; // ['Mon', 'Tue', ...]
-  tasks: RoutineTask[];
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Habit {
-  id?: string;
-  userId: string;
-  title: string;
-  frequency: 'daily' | 'weekly' | 'custom';
-  currentStreak: number;
-  longestStreak: number;
-  logs: string[]; // ISO dates
-  createdAt: string;
-}
-
-export interface Alarm {
-  id?: string;
-  userId: string;
-  time: string;
-  label: string;
-  isActive: boolean;
-  routineId?: string;
-  days: string[];
-  createdAt: string;
-}
-
-export type GoalType = 'tasks_completed' | 'routine_consistency' | 'habit_streak' | 'time_spent' | 'xp_earned' | 'routines_completed';
-
-export interface Goal {
-  id?: string;
-  userId: string;
-  title: string;
-  description?: string;
-  type: GoalType;
-  target_value: number;
-  current_value: number;
-  deadline?: string;
-  status: 'active' | 'completed' | 'failed';
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UserSettings {
-  userId: string;
-  darkMode: boolean;
-  notifications: boolean;
-  theme: 'system' | 'default' | 'dark' | 'light';
-  onboardingCompleted: boolean;
+export interface User {
+  id: number;
+  email: string;
   level: number;
   xp: number;
-  skills: {
-    discipline: number;
-    fitness: number;
-    focus: number;
+  is_banned: boolean;
+}
+
+export interface Task {
+  id: number;
+  user_id: number;
+  title: string;
+  status: 'pending' | 'completed';
+  type: string;
+  validation_data?: string;
+  created_at: string;
+}
+
+export interface Goal {
+  id: number;
+  user_id: number;
+  title: string;
+  target_value: number;
+  current_value: number;
+  status: 'active' | 'completed';
+  created_at: string;
+}
+
+export interface Feature {
+  id: string;
+  name: string;
+  isEnabled: boolean;
+  isBeta: boolean;
+  requiredLevel: number;
+}
+
+export interface AdminConfig {
+  features: Feature[];
+  xpSettings: {
+    taskXP: number;
+    routineXP: number;
+    dailyCap: number;
   };
-  onboardingData?: {
-    age: number;
-    weight?: number;
-    goals: string[];
-    sports: string[];
-    lifestyle: string;
+  content: {
+    tos: string;
+    privacy: string;
+    version: string;
+    updateMessage: string;
+    lastUpdated: string;
   };
 }

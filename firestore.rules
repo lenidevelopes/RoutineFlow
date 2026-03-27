@@ -30,6 +30,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         request.auth.token.email == "dabussy38@gmail.com");
+    }
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -69,15 +75,18 @@ service cloud.firestore {
       return hasRequiredFields(['userId', 'title', 'completed', 'priority', 'createdAt', 'updatedAt']) &&
              data.userId is string && data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
              data.completed is bool && data.priority in ['low', 'medium', 'high'] &&
-             isValidDateString(data.createdAt) && isValidDateString(data.updatedAt);
+             isValidDateString(data.createdAt) && isValidDateString(data.updatedAt) &&
+             (!('category' in data) || data.category is string) &&
+             (!('tags' in data) || data.tags is list) &&
+             (!('checklist' in data) || data.checklist is list);
     }
 
     function isValidRoutine(data) {
-      return hasRequiredFields(['userId', 'name', 'wake_time', 'sleep_time', 'total_duration_min', 'blocks', 'isActive', 'assignedDays', 'createdAt', 'updatedAt']) &&
+      return hasRequiredFields(['userId', 'name', 'type', 'activeDays', 'tasks', 'isActive', 'createdAt', 'updatedAt']) &&
              data.userId is string && data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
-             data.wake_time is string && data.sleep_time is string &&
-             data.total_duration_min is number && data.blocks is list &&
-             data.isActive is bool && data.assignedDays is list &&
+             data.type in ['morning', 'school', 'evening', 'custom'] &&
+             data.activeDays is list && data.tasks is list &&
+             data.isActive is bool &&
              isValidDateString(data.createdAt) && isValidDateString(data.updatedAt);
     }
 
@@ -99,16 +108,25 @@ service cloud.firestore {
     function isValidGoal(data) {
       return hasRequiredFields(['userId', 'title', 'type', 'target_value', 'current_value', 'status', 'createdAt', 'updatedAt']) &&
              data.userId is string && data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
-             data.type in ['tasks_completed', 'routine_consistency', 'habit_streak', 'time_spent'] &&
+             data.type in ['tasks_completed', 'routine_consistency', 'habit_streak', 'time_spent', 'xp_earned', 'routines_completed'] &&
              data.target_value is number && data.current_value is number &&
              data.status in ['active', 'completed', 'failed'] &&
              isValidDateString(data.createdAt) && isValidDateString(data.updatedAt);
     }
 
     function isValidSettings(data) {
-      return hasRequiredFields(['userId', 'darkMode', 'notifications', 'theme']) &&
-             data.userId is string && data.darkMode is bool &&
-             data.notifications is bool && data.theme in ['system', 'default', 'dark', 'light'];
+      return data.userId is string &&
+             (!('darkMode' in data) || data.darkMode is bool) &&
+             (!('notifications' in data) || data.notifications is bool) &&
+             (!('theme' in data) || data.theme in ['system', 'default', 'dark', 'light']) &&
+             (!('agreedToTerms' in data) || data.agreedToTerms is bool) &&
+             (!('onboardingCompleted' in data) || data.onboardingCompleted is bool) &&
+             (!('level' in data) || data.level is number) &&
+             (!('xp' in data) || data.xp is number) &&
+             (!('skills' in data) || data.skills is map) &&
+             (!('skipsToday' in data) || data.skipsToday is number) &&
+             (!('lastSkipReset' in data) || data.lastSkipReset is string) &&
+             (!('updatedAt' in data) || isValidDateString(data.updatedAt));
     }
 
     // ===============================================================
@@ -150,10 +168,15 @@ service cloud.firestore {
     }
 
     match /settings/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isValidSettings(request.resource.data);
-      allow update: if isOwner(userId) && isValidSettings(request.resource.data);
-      allow delete: if isOwner(userId);
+      allow update: if (isOwner(userId) || isAdmin()) && isValidSettings(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /policies/{policyId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "RoutineFlow",
-  "description": "A modern, high-performance productivity app focused on daily routines, tasks, and time management with AI optimization.",
-  "requestFramePermissions": []
+  "name": "Productivity Pro",
+  "description": "A full-stack mobile productivity app with tasks, goals, stats, admin controls, and offline AI.",
+  "requestFramePermissions": ["camera", "microphone"]
 }
